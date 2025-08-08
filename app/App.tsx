@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Friend from "./Friend";
 import "./global.css";
 import Home from "./Home";
+import Layoutx from "./Layout";
 import Profile from "./Profile";
 import ResetPw from "./reset";
 import SignIn from "./signin";
@@ -9,7 +10,7 @@ import SignUp from "./signup";
 const Stack = createNativeStackNavigator();
 export default function App() {
   return (
-    <Stack.Navigator initialRouteName="Home">
+    <Stack.Navigator initialRouteName="SignIn">
       <Stack.Screen
         name="SignIn"
         component={SignIn}
@@ -41,6 +42,11 @@ export default function App() {
        <Stack.Screen
         name="Home"
         component={Home}
+        options={{ headerShown: false }}
+      />
+        <Stack.Screen
+        name="Layout"
+        component={Layoutx}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

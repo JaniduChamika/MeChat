@@ -9,47 +9,48 @@ import {
       TouchableOpacity,
       View,
 } from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function HomeScreen() {
   const [searchText, setSearchText] = useState("");
 
-//   const stories = [
-//     {
-//       id: 1,
-//       name: "Darren",
-//       image:
-//         "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=face",
-//       online: false,
-//     },
-//     {
-//       id: 2,
-//       name: "Lesa",
-//       image:
-//         "https://images.unsplash.com/photo-1494790108755-2616b612b3ae?w=60&h=60&fit=crop&crop=face",
-//       online: true,
-//     },
-//     {
-//       id: 3,
-//       name: "Florian",
-//       image:
-//         "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&h=60&fit=crop&crop=face",
-//       online: true,
-//     },
-//     {
-//       id: 4,
-//       name: "Curtis",
-//       image:
-//         "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop&crop=face",
-//       online: false,
-//     },
-//     {
-//       id: 5,
-//       name: "Camila",
-//       image:
-//         "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&crop=face",
-//       online: false,
-//     },
-//   ];
+  //   const stories = [
+  //     {
+  //       id: 1,
+  //       name: "Darren",
+  //       image:
+  //         "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=face",
+  //       online: false,
+  //     },
+  //     {
+  //       id: 2,
+  //       name: "Lesa",
+  //       image:
+  //         "https://images.unsplash.com/photo-1494790108755-2616b612b3ae?w=60&h=60&fit=crop&crop=face",
+  //       online: true,
+  //     },
+  //     {
+  //       id: 3,
+  //       name: "Florian",
+  //       image:
+  //         "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&h=60&fit=crop&crop=face",
+  //       online: true,
+  //     },
+  //     {
+  //       id: 4,
+  //       name: "Curtis",
+  //       image:
+  //         "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop&crop=face",
+  //       online: false,
+  //     },
+  //     {
+  //       id: 5,
+  //       name: "Camila",
+  //       image:
+  //         "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&crop=face",
+  //       online: false,
+  //     },
+  //   ];
 
   const chats = [
     {
@@ -124,46 +125,43 @@ export default function HomeScreen() {
         "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop&crop=face",
       online: false,
     },
-    
   ];
 
-  const handleMenuPress = () => {
-    console.log("Menu pressed");
+
+
+  const handleSearch = (text) => {
+    console.log("Search pressed: " + text);
   };
 
-  const handleSearchPress = () => {
-    console.log("Search pressed");
-  };
-
-//   const handleStoryPress = (story) => {
-//     console.log("Story pressed:", story.name);
-//   };
+  //   const handleStoryPress = (story) => {
+  //     console.log("Story pressed:", story.name);
+  //   };
 
   const handleChatPress = (chat) => {
     console.log("Chat pressed:", chat.name);
-       router.push({ pathname: "/Chat", params: { id: chat.id.toString() } }); 
+    router.push({ pathname: "/Chat", params: { id: chat.id.toString() } });
   };
 
-//   const renderStory = ({ item }) => (
-//     <TouchableOpacity
-//       onPress={() => handleStoryPress(item)}
-//       className="flex items-center space-y-2 mr-4"
-//     >
-//       <View className="relative">
-//         <View className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200">
-//           <Image
-//             source={{ uri: item.image }}
-//             className="w-full h-full"
-//             resizeMode="cover"
-//           />
-//         </View>
-//         {item.online && (
-//           <View className="absolute bottom-1 right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full" />
-//         )}
-//       </View>
-//       <Text className="text-xs text-gray-600 font-medium">{item.name}</Text>
-//     </TouchableOpacity>
-//   );
+  //   const renderStory = ({ item }) => (
+  //     <TouchableOpacity
+  //       onPress={() => handleStoryPress(item)}
+  //       className="flex items-center space-y-2 mr-4"
+  //     >
+  //       <View className="relative">
+  //         <View className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200">
+  //           <Image
+  //             source={{ uri: item.image }}
+  //             className="w-full h-full"
+  //             resizeMode="cover"
+  //           />
+  //         </View>
+  //         {item.online && (
+  //           <View className="absolute bottom-1 right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full" />
+  //         )}
+  //       </View>
+  //       <Text className="text-xs text-gray-600 font-medium">{item.name}</Text>
+  //     </TouchableOpacity>
+  //   );
 
   const renderChat = ({ item }) => (
     <TouchableOpacity
@@ -221,11 +219,17 @@ export default function HomeScreen() {
       {/* Search Bar */}
       <View className="px-5 py-3">
         <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-1">
-          <Text className="text-gray-400 mr-3">🔍</Text>
+          <Text className="text-gray-400 mr-3">
+            {" "}
+            <Ionicons name="search-outline" color="#000" size={24} />
+          </Text>
           <TextInput
             placeholder="Search for friends"
             value={searchText}
-            onChangeText={setSearchText}
+            onChangeText={(text) => {
+              setSearchText(text);
+              handleSearch(text);
+            }}
             className="flex-1 text-base"
             placeholderTextColor="#9CA3AF"
           />
@@ -252,11 +256,6 @@ export default function HomeScreen() {
         className="flex-1"
         showsVerticalScrollIndicator={false}
       />
-
-      {/* Home Indicator */}
-      <View className="items-center pb-2">
-        <View className="w-32 h-1 bg-black rounded-full" />
-      </View>
     </SafeAreaView>
   );
 }

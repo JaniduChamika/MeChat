@@ -14,13 +14,13 @@ export default function SignUpScreen() {
     console.log("Sign up pressed");
   };
 
-  const handlePhoneSignUp = () => {
-    console.log("Phone sign up pressed");
-  };
+  // const handlePhoneSignUp = () => {
+  //   console.log("Phone sign up pressed");
+  // };
 
-  const handleBackPress = () => {
-    console.log("Back pressed");
-  };
+  // const handleBackPress = () => {
+  //   console.log("Back pressed");
+  // };
 
   const handleProfileImagePress = () => {
     console.log("Profile image pressed");
