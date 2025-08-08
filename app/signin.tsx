@@ -10,7 +10,7 @@ export default function SignInScreen() {
 
   const handleLogIn = () => {
     console.log("Log in pressed");
-    router.push("/Home")
+    router.push("/Layout")
   };
 
   const handleFacebookLogin = () => {
