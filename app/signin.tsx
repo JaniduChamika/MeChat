@@ -1,6 +1,8 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -9,17 +11,59 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-// import "./global.css";
 
 export default function SignInScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const handleLogIn = () => {
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  useEffect(() => {
+    checkUser();
+  }, []);
+  async function handleLogIn() {
     console.log("Log in pressed");
-    router.push("/Layout");
-  };
+    setIsLoggingIn(true);
+    var useremail = email;
+    var pw = password;
 
+    var formData = new FormData();
+    formData.append("email", useremail);
+    formData.append("password", pw);
+
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = async function () {
+      if (request.readyState == 4 && request.status == 200) {
+        var jsonResponseText = request.responseText;
+
+        var jsResponseObject = JSON.parse(jsonResponseText);
+        if (jsResponseObject.msg == "Success") {
+          var userObject = jsResponseObject.user;
+          await AsyncStorage.setItem("user", JSON.stringify(userObject));
+          router.push("/Layout");
+        } else {
+          console.log(jsResponseObject);
+          setIsLoggingIn(false);
+          Alert.alert("Error", jsResponseObject.msg);
+        }
+      }
+    };
+    request.open(
+      "POST",
+      "http://10.0.2.2:8080/React-Native/MeChat/backend/sign-in.php",
+      true
+    );
+
+    request.send(formData);
+  }
+  async function checkUser() {
+    try {
+      const userJsonText = await AsyncStorage.getItem("user");
+      if (userJsonText) {
+        router.replace("/Layout");
+      }
+    } catch (error) {
+      console.error("Error reading user from storage", error);
+    }
+  }
   const handleFacebookLogin = () => {
     console.log("Facebook login pressed");
   };
@@ -89,6 +133,7 @@ export default function SignInScreen() {
           <TouchableOpacity
             onPress={handleLogIn}
             className="w-full bg-blue-400 py-4 rounded-full mb-5"
+            disabled={isLoggingIn}
           >
             <Text className="text-white text-base font-semibold text-center">
               Log In

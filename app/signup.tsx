@@ -3,6 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -25,7 +26,7 @@ export default function SignUpScreen() {
   const [profileImage, setProfileImage] = useState(
     require("../assets/images/profile-default.png")
   );
-
+  const [isSignUp, setIsSignUp] = useState(false);
   useEffect(() => {
     loadCountry();
   }, []);
@@ -36,18 +37,19 @@ export default function SignUpScreen() {
         var response = request.responseText;
         var responseJSONText = JSON.parse(response);
         setCountries(responseJSONText);
-        console.log(response);
+        // console.log(response);
       }
     };
     request.open(
-      "POST",
+      "GET",
       "http://10.0.2.2:8080/React-Native/MeChat/backend/load-country.php",
       true
     );
     request.send();
   }
   function handleSignUp() {
-    console.log("Sign up pressed");
+    // console.log("Sign up pressed");
+    setIsSignUp(true);
     var useremail = email;
     var username = name;
     var pw = password;
@@ -67,8 +69,10 @@ export default function SignUpScreen() {
         var response = request.responseText;
         if (response == "User registered successfully.") {
           router.push("/signin");
-        }else{
+        } else {
           console.log(response);
+          Alert.alert("Error", response);
+          setIsSignUp(false);
         }
       }
     };
@@ -211,6 +215,7 @@ export default function SignUpScreen() {
           <TouchableOpacity
             onPress={handleSignUp}
             className="w-full bg-blue-500 py-4 rounded-full mb-5 active:bg-blue-600"
+            disabled={isSignUp}
           >
             <Text className="text-white text-base font-semibold text-center">
               Sign Up
