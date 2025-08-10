@@ -1,14 +1,30 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
-      Image,
-      SafeAreaView,
-      Text,
-      TouchableOpacity,
-      View,
+  Image,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+
 export default function ProfileScreen() {
+  const [user, setUser] = useState(null);
+  async function loaduser() {
+    const userJsonText = await AsyncStorage.getItem("user");
+    const userObject = JSON.parse(userJsonText);
+    setUser(userObject);
+    // console.log(userObject.name);
+  }
+
+  loaduser();
+  async function handleLogout() {
+    await AsyncStorage.removeItem("user");
+    router.push("/signin");
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="p-4 mt-5">
@@ -17,12 +33,12 @@ export default function ProfileScreen() {
           <Image
             className="w-24 h-24 rounded-full"
             source={{
-              uri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+              uri: "http://10.0.2.2:8080/React-Native/MeChat/backend/"+user?.profile_url,
             }}
           />
         </View>
         <Text className="text-center text-lg font-semibold mb-6">
-          Cristina Kardashian
+          {user?.name}
         </Text>
         <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-200">
           <Text className="flex-1 text-gray-600">Account Details</Text>
@@ -44,7 +60,7 @@ export default function ProfileScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           className="p-4 mt-6 bg-gray-100 rounded-lg"
-          onPress={() => router.push("/signin")}
+          onPress={handleLogout}
         >
           <Text className="text-center text-gray-600">Logout</Text>
         </TouchableOpacity>
