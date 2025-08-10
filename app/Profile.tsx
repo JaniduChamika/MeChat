@@ -7,7 +7,7 @@ import {
       TouchableOpacity,
       View,
 } from "react-native";
-
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 export default function ProfileScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -26,15 +26,21 @@ export default function ProfileScreen() {
         </Text>
         <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-200">
           <Text className="flex-1 text-gray-600">Account Details</Text>
-          <Text className="text-gray-400">icon</Text>
+          <Text className="text-gray-400">
+            <MaterialIcons name="arrow-forward-ios" color="#c4c4c4" size={20} />
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-200">
           <Text className="flex-1 text-gray-600">Settings</Text>
-          <Text className="text-gray-400">icon</Text>
+          <Text className="text-gray-400">
+            <MaterialIcons name="arrow-forward-ios" color="#c4c4c4" size={20} />
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-200">
           <Text className="flex-1 text-green-500">Contact Us</Text>
-          <Text className="text-gray-400">icon</Text>
+          <Text className="text-gray-400">
+            <MaterialIcons name="arrow-forward-ios" color="#c4c4c4" size={20} />
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           className="p-4 mt-6 bg-gray-100 rounded-lg"
