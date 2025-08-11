@@ -17,7 +17,7 @@ $chatArray = array();
 
 for ($i = 0; $i < $table->num_rows; $i++) {
       $row = $table->fetch_assoc();
-
+      DB::iudParam("UPDATE `chat` SET `status_id` = '1' WHERE chat.`id` = ? AND `user_from` = ?", [$row["id"], $friend]);
       $chatObject = new stdClass();
       $chatObject->id = $row["id"];
       $chatObject->msg = $row["message"];

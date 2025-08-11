@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: "row",
-    paddingTop: StatusBar.currentHeight,
+    paddingTop: 20,
     marginBottom: 20,
   },
   tabItem: {
