@@ -4,33 +4,26 @@ import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
-  SafeAreaView,
+  
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-const friendsData = [
-  {
-    id: "1",
-    name: "Mohamed",
-    status: "accept",
-    image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-  },
-  
-];
 
 export default function FriendsScreen() {
   const [searchText, setSearchText] = useState("");
-  const [friends, setFriends] = useState(friendsData);
-  const [user, setUser] = useState(null);
+  const [friends, setFriends] = useState();
+  const [user, setUser] = useState();
   useEffect(() => {
     loaduser();
-    loadFriends();
   }, []);
+  useEffect(() => {
+    loadFriends();
+  }, [user]);
 
   async function loaduser() {
     const userJsonText = await AsyncStorage.getItem("user");
@@ -39,11 +32,11 @@ export default function FriendsScreen() {
     // console.log(userObject.name);
   }
 
-  function loadFriends() {
+  async function loadFriends() {
     var formData = new FormData();
     formData.append("user_id", user?.id);
     var request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
+    request.onreadystatechange = await function () {
       if (request.readyState == 4 && request.status == 200) {
         var response = request.responseText;
         var responseJSONText = JSON.parse(response);
@@ -63,7 +56,7 @@ export default function FriendsScreen() {
     console.log("Search pressed: " + text);
   };
   const renderItem = ({ item }) => (
-    <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
+    <View className="flex-row items-center justify-between p-4 border-b border-gray-100">
       <View className="flex-row items-center">
         <Image
           className="w-10 h-10 rounded-full mr-3"
@@ -78,7 +71,12 @@ export default function FriendsScreen() {
       </View>
       <TouchableOpacity
         className="bg-gray-100 p-2 rounded"
-        onPress={() => router.push("/Chat")}
+        onPress={() =>
+          router.push({
+            pathname: "/Chat",
+            params: { friendId: item.id, name: item.name , profilePic: item.profile_pic },
+          })
+        }
       >
         <Text className="text-gray-600">
           <MaterialCommunityIcons
@@ -93,10 +91,10 @@ export default function FriendsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="py-4">
-        <Text className="text-xl font-bold text-center mb-4 mt-5">Friends</Text>
+      <View className="py-2 px-2">
+        <Text className="text-xl font-bold text-center  ">Friends</Text>
         {/* Search Bar */}
-        <View className="px-1 py-3">
+        <View className="px-4 py-3">
           <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-1">
             <Text className="text-gray-400 mr-3">
               {" "}
@@ -115,13 +113,12 @@ export default function FriendsScreen() {
           </View>
         </View>
 
-          <FlatList
-            data={friends}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={true}
-          />
-     
+        <FlatList
+          data={friends}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          scrollEnabled={true}
+        />
       </View>
     </SafeAreaView>
   );
