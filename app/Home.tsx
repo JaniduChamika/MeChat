@@ -3,12 +3,15 @@ import React, { useState } from "react";
 import {
       FlatList,
       Image,
-      SafeAreaView,
+      KeyboardAvoidingView,
+      Platform,
+      
       Text,
       TextInput,
       TouchableOpacity,
       View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function HomeScreen() {
@@ -197,24 +200,13 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+       <KeyboardAvoidingView
+              style={{ flex: 1 }}
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+            >
       {/* Header */}
-      <View className="flex-row justify-between items-center px-5 py-4 border-b border-gray-100">
-        {/* <TouchableOpacity onPress={handleMenuPress}>
-          <View className="space-y-1">
-            <View className="w-5 h-0.5 bg-black" />
-            <View className="w-5 h-0.5 bg-black" />
-            <View className="w-5 h-0.5 bg-black" />
-          </View>
-        </TouchableOpacity> */}
-
-        {/* <Text className="text-lg font-semibold text-black">Home</Text> */}
-
-        {/* <TouchableOpacity onPress={handleSearchPress}>
-          <View className="w-6 h-6 border-2 border-black border-opacity-60 rounded items-center justify-center">
-            <Text className="text-xs">🔍</Text>
-          </View>
-        </TouchableOpacity> */}
-      </View>
+    
 
       {/* Search Bar */}
       <View className="px-5 py-3">
@@ -249,13 +241,14 @@ export default function HomeScreen() {
       </View> */}
 
       {/* Chat List */}
-      <FlatList
+      <FlatList 
         data={chats}
         renderItem={renderChat}
         keyExtractor={(item) => item.id.toString()}
         className="flex-1"
         showsVerticalScrollIndicator={false}
       />
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
