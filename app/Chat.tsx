@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -16,48 +17,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "react-native-vector-icons/Feather";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-const chatdata1 = [
-  {
-    id: "1",
-    msg: "Good Morning",
-    time: "08.41 pm",
-    side: "left", // left for received messages
-    status: "seen",
-    type: "text",
-  },
-  {
-    id: "2",
-    msg: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=300&h=200&fit=crop",
-    time: "08.41 pm",
-    side: "right", // right for sent messages
-    status: "seen",
-    type: "image",
-  },
-  {
-    id: "3",
-    msg: "voice_message_url_here",
-    time: "08.41 pm",
-    side: "left",
-    status: "seen",
-    type: "voice",
-  },
-  {
-    id: "4",
-    msg: "Just did a drive test today with this beauty",
-    time: "09.15 pm",
-    side: "right",
-    status: "delivered",
-    type: "text",
-  },
-  {
-    id: "5",
-    msg: "Wow, that's gorgeous 🔥🔥🔥",
-    time: "09.20 pm",
-    side: "left",
-    status: "seen",
-    type: "text",
-  },
-];
 export default function ChatScreen() {
   const params = useGlobalSearchParams();
   const friendId = params.friendId;
@@ -67,7 +26,7 @@ export default function ChatScreen() {
   const [messageText, setMessageText] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [user, setUser] = useState(null);
-  const [chatdata, setChatData] = useState(chatdata1);
+  const [chatdata, setChatData] = useState([]);
   const [playingVoice, setPlayingVoice] = useState(null);
   useEffect(() => {
     loaduser();
@@ -75,6 +34,7 @@ export default function ChatScreen() {
   useEffect(() => {
     loadChat();
   }, [user]);
+
   async function loaduser() {
     const userJsonText = await AsyncStorage.getItem("user");
     const userObject = JSON.parse(userJsonText);
@@ -82,12 +42,12 @@ export default function ChatScreen() {
     // console.log(userObject.name);
   }
 
-  async function loadChat() {
+  function loadChat() {
     var formData = new FormData();
     formData.append("user_id", user?.id);
     formData.append("friend_id", friendId);
     var request = new XMLHttpRequest();
-    request.onreadystatechange = await function () {
+    request.onreadystatechange = function () {
       if (request.readyState == 4 && request.status == 200) {
         var response = request.responseText;
         var responseJSONText = JSON.parse(response);
@@ -103,6 +63,41 @@ export default function ChatScreen() {
     request.send(formData);
   }
 
+  function SendMessage() {
+    // console.log("Send message:", messageText);
+    if (messageText.length != 0) {
+      var requestMsgObject = {
+        msg: messageText,
+        from_user_id: user?.id,
+        to_user_id: friendId,
+      };
+      var reqMsgJsonobject = JSON.stringify(requestMsgObject);
+      var formData = new FormData();
+      formData.append("reqMsgJsonobject", reqMsgJsonobject);
+      var request = new XMLHttpRequest();
+      request.onreadystatechange = function () {
+        if (request.readyState == 4 && request.status == 200) {
+          var response = request.responseText;
+
+          if (response == "Success") {
+            loadChat();
+            setMessageText("");
+          } else {
+            console.log(response);
+          }
+        }
+      };
+      request.open(
+        "POST",
+        "http://10.0.2.2:8080/React-Native/MeChat/backend/chat-save.php",
+        true
+      );
+
+      request.send(formData);
+    }
+  }
+
+  
   const handleSettingsPress = () => {
     console.log("Settings pressed");
   };
@@ -113,13 +108,6 @@ export default function ChatScreen() {
 
   const handleVideoPress = () => {
     console.log("Video call pressed");
-  };
-
-  const handleSendMessage = () => {
-    if (messageText.trim()) {
-      console.log("Send message:", messageText);
-      setMessageText("");
-    }
   };
 
   const handleCameraPress = () => {
@@ -145,7 +133,6 @@ export default function ChatScreen() {
   // Function to render different message types
 
   const renderMessage = ({ item }) => {
-    console.log("Rendering message:", item);
     const isRight = item.side === "right";
 
     return (
@@ -167,7 +154,7 @@ export default function ChatScreen() {
         <View className="max-w-xs">
           {item.type === "text" && (
             <View
-             className={`${isRight ? 'bg-blue-500 rounded-3xl rounded-tr-none' : 'bg-gray-200 rounded-3xl rounded-tl-none'} px-4 py-3`}
+              className={`${isRight ? "bg-blue-500 rounded-3xl rounded-tr-none" : "bg-gray-200 rounded-3xl rounded-tl-none"} px-4 py-3`}
             >
               <Text
                 className={`${isRight ? "text-white" : "text-black"} text-sm`}
@@ -243,11 +230,32 @@ export default function ChatScreen() {
     );
   };
 
+  //remove keyboard gap when keyboard is hidden
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardVisible(true)
+    );
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardVisible(false)
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
   return (
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : keyboardVisible
+              ? "height"
+              : undefined
+        }
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
         {/* Chat Header */}
@@ -324,11 +332,11 @@ export default function ChatScreen() {
               onChangeText={setMessageText}
               className="py-4 px-4 bg-gray-100 rounded-full text-sm focus:bg-white "
               placeholderTextColor="#9CA3AF"
-              onSubmitEditing={handleSendMessage}
+              onSubmitEditing={SendMessage}
             />
           </View>
 
-          <TouchableOpacity onPress={handleSendMessage}>
+          <TouchableOpacity onPress={SendMessage}>
             <Text className="text-blue-500 text-xl">
               {" "}
               <Ionicons name="send" color="#000" size={24} />
