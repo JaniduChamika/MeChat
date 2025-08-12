@@ -2,9 +2,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   FlatList,
   Image,
   Modal,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -16,17 +18,23 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 
 export default function FriendsScreen() {
   const [searchText, setSearchText] = useState("");
-  const [friends, setFriends] = useState();
+  const [friends, setFriends] = useState([]);
   const [user, setUser] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [friendEmail, setFriendEmail] = useState("");
+  const [isErrorVisible, setIsErrorVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showRequestsModal, setShowRequestsModal] = useState(false);
+  const [friendRequests, setFriendRequests] = useState([]);
+
   useEffect(() => {
     loaduser();
   }, []);
   useEffect(() => {
     loadFriends();
-  }, [user]);
+    loadFriendsRequests();
+  }, [user, searchText]);
 
   async function loaduser() {
     const userJsonText = await AsyncStorage.getItem("user");
@@ -35,11 +43,11 @@ export default function FriendsScreen() {
     // console.log(userObject.name);
   }
 
-  async function loadFriends() {
+  function loadFriends() {
     var formData = new FormData();
     formData.append("user_id", user?.id);
     var request = new XMLHttpRequest();
-    request.onreadystatechange = await function () {
+    request.onreadystatechange = function () {
       if (request.readyState == 4 && request.status == 200) {
         var response = request.responseText;
         var responseJSONText = JSON.parse(response);
@@ -54,9 +62,93 @@ export default function FriendsScreen() {
     );
     request.send(formData);
   }
+  function AddFriend() {
+    if (friendEmail.trim() === "") {
+      console.log("Please enter a valid email address.");
+      return;
+    }
+    var requestMsgObject = {
+      user_id: user?.id,
+      friend_email: friendEmail,
+    };
+    var reqMsgJsonobject = JSON.stringify(requestMsgObject);
+    var formData = new FormData();
+    formData.append("reqMsgJsonobject", reqMsgJsonobject);
+
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+      if (request.readyState == 4 && request.status == 200) {
+        var response = request.responseText;
+        if (response == "Success") {
+          loadFriends();
+          setFriendEmail("");
+          setShowAddModal(false);
+        } else {
+          setIsErrorVisible(true);
+          setErrorMessage(response);
+        }
+        console.log(response);
+      }
+    };
+    request.open(
+      "POST",
+      "http://10.0.2.2:8080/React-Native/MeChat/backend/add-friend.php",
+      true
+    );
+    request.send(formData);
+  }
+  async function loadFriendsRequests() {
+    var formData = new FormData();
+    formData.append("user_id", user?.id);
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = await function () {
+      if (request.readyState == 4 && request.status == 200) {
+        var response = request.responseText;
+        var responseJSONText = JSON.parse(response);
+        setFriendRequests(responseJSONText);
+        // console.log(response);
+      }
+    };
+    request.open(
+      "POST",
+      "http://10.0.2.2:8080/React-Native/MeChat/backend/load-friends-req.php",
+      true
+    );
+    request.send(formData);
+  }
+
+  function AcceptRequest(requestId, friendId) {
+    var requestMsgObject = {
+      user_id: user?.id,
+      friend_id: friendId,
+      request_id: requestId,
+    };
+    var reqMsgJsonobject = JSON.stringify(requestMsgObject);
+    var formData = new FormData();
+    formData.append("reqMsgJsonobject", reqMsgJsonobject);
+
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+      if (request.readyState == 4 && request.status == 200) {
+        var response = request.responseText;
+        if (response == "Success") {
+          loadFriends();
+          loadFriendsRequests();
+          setShowRequestsModal(false);
+        }
+        console.log(response);
+      }
+    };
+    request.open(
+      "POST",
+      "http://10.0.2.2:8080/React-Native/MeChat/backend/accept-friend.php",
+      true
+    );
+    request.send(formData);
+  }
 
   const handleSearch = (text) => {
-    console.log("Search pressed: " + text);
+    loadFriends();
   };
   const renderItem = ({ item }) => (
     <View className="flex-row items-center justify-between p-4 border-b border-gray-100">
@@ -77,23 +169,40 @@ export default function FriendsScreen() {
       </View>
       <TouchableOpacity
         className="bg-gray-100 p-2 rounded"
-        onPress={() =>
-          router.push({
-            pathname: "/Chat",
-            params: {
-              friendId: item.id,
-              name: item.name,
-              profilePic: item.profile_pic,
-            },
-          })
-        }
+        onPress={() => {
+          if (item.status === "pending") {
+            Alert.alert("Status", "Friend request is pending.");
+          } else {
+            router.push({
+              pathname: "/Chat",
+              params: {
+                friendId: item.id,
+                name: item.name,
+                profilePic: item.profile_pic,
+              },
+            });
+          }
+        }}
       >
         <Text className="text-gray-600">
-          <MaterialCommunityIcons
-            name="android-messages"
-            color="#000"
-            size={24}
-          />
+          {item.status === "accept" ? (
+            <MaterialCommunityIcons
+              name="android-messages"
+              color="#000"
+              size={24}
+            />
+          ) : (
+            ""
+          )}
+          {item.status === "pending" ? (
+            <MaterialCommunityIcons
+              name="account-clock"
+              color="#000"
+              size={24}
+            />
+          ) : (
+            ""
+          )}
         </Text>
       </TouchableOpacity>
     </View>
@@ -122,7 +231,17 @@ export default function FriendsScreen() {
             />
           </View>
         </View>
-
+        {/* Friends request */}
+        <View className="h-auto w-full items-end">
+          <TouchableOpacity
+            onPress={() => setShowRequestsModal(true)}
+            className="self-end"
+          >
+            <Text className="text-blue-500 ">
+              Friend Requests ({friendRequests.length})
+            </Text>
+          </TouchableOpacity>
+        </View>
         <FlatList
           data={friends}
           renderItem={renderItem}
@@ -167,6 +286,8 @@ export default function FriendsScreen() {
                 onPress={() => {
                   setShowAddModal(false);
                   setFriendEmail("");
+                  setErrorMessage("");
+                  setIsErrorVisible(false);
                 }}
                 className="w-8 h-8 items-center justify-center rounded-full active:bg-gray-100"
               >
@@ -197,6 +318,11 @@ export default function FriendsScreen() {
                   placeholderTextColor="#9CA3AF"
                 />
               </View>
+              <Text
+                className={`text-sm text-red-400 mt-1 ${isErrorVisible ? "" : "hidden"}`}
+              >
+                {errorMessage}
+              </Text>
             </View>
 
             {/* Action Buttons */}
@@ -205,6 +331,8 @@ export default function FriendsScreen() {
                 onPress={() => {
                   setShowAddModal(false);
                   setFriendEmail("");
+                  setErrorMessage("");
+                  setIsErrorVisible(false);
                 }}
                 className="flex-1 py-3 px-4 mr-2 border border-gray-300 rounded-xl items-center active:bg-gray-50"
               >
@@ -212,7 +340,7 @@ export default function FriendsScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                // onPress={handleAddFriend}
+                onPress={AddFriend}
                 disabled={isLoading}
                 className={`flex-1 py-3 px-4 ml-2 rounded-xl items-center ${
                   isLoading ? "bg-blue-300" : "bg-blue-500 active:bg-blue-600"
@@ -223,6 +351,89 @@ export default function FriendsScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Friend Requests Modal */}
+      <Modal
+        visible={showRequestsModal}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+      >
+        <View className="flex-1 bg-black/50 justify-center items-center px-2">
+          <View className="w-full max-w-sm bg-white rounded-2xl p-6">
+            {/* Modal Header */}
+            <View className="flex-row items-center justify-between mb-6">
+              <Text className="text-xl font-bold text-black">
+                Friend Requests ({friendRequests.length})
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowRequestsModal(false)}
+                className="w-10 h-10  rounded items-center justify-center"
+              >
+                <Ionicons name="close" color="#000" size={24} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Friend Requests List */}
+            <ScrollView
+              className="max-h-96"
+              showsVerticalScrollIndicator={false}
+            >
+              {friendRequests.map((request) => (
+                <View key={request.id} className=" border-b border-gray-200">
+                  {/* Friend Info - Green Background */}
+                  <View className="bg-white rounded-lg py-4 px-2">
+                    <View className="flex-row items-center">
+                      <View className="w-12 h-12 rounded-full overflow-hidden mr-3">
+                        <Image
+                          source={{
+                            uri:
+                              "http://10.0.2.2:8080/React-Native/MeChat/backend/" +
+                              request.profile_pic,
+                          }}
+                          className="w-full h-full"
+                          resizeMode="cover"
+                        />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-black font-semibold text-base">
+                          {request.name}
+                        </Text>
+                        <Text className="text-gray-500 text-xs">
+                          {request.email}
+                        </Text>
+                      </View>
+                      {/* Accept Button - Yellow Background */}
+                      <TouchableOpacity
+                        onPress={() =>
+                          AcceptRequest(request.id, request.friend_id)
+                        }
+                        className="w-100 bg-green-600 rounded-lg p-2 items-center"
+                      >
+                        <Text className="text-white font-bold text-base ">
+                          <Ionicons
+                            name="checkmark-sharp"
+                            color="#fff"
+                            size={20}
+                          />
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+
+            {/* Close Button - Blue Background */}
+            <TouchableOpacity
+              onPress={() => setShowRequestsModal(false)}
+              className="bg-gray-200 rounded-lg py-3 items-center mt-4"
+            >
+              <Text className="text-black font-bold text-base">Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

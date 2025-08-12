@@ -165,15 +165,23 @@ export default function HomeScreen() {
               {item.name}
             </Text>
             <View className="flex-row items-center">
-              <Text className="text-xs text-gray-400 mr-2">
-                {item.status === "seen" ? (
-                  <Ionicons name="checkmark-done" color="#0189D3" size={13} />
-                ) : item.status === "delivered" ? (
-                  <Ionicons name="checkmark-done" color="#A4A4A5" size={13} />
-                ) : (
-                  <Ionicons name="checkmark-sharp" color="#A4A4A5" size={13} />
-                )}
-              </Text>
+              {item.lastsender === "me" ? (
+                <Text className="text-xs text-gray-400 mr-2">
+                  {item.status === "seen" ? (
+                    <Ionicons name="checkmark-done" color="#0189D3" size={13} />
+                  ) : item.status === "delivered" ? (
+                    <Ionicons name="checkmark-done" color="#A4A4A5" size={13} />
+                  ) : (
+                    <Ionicons
+                      name="checkmark-sharp"
+                      color="#A4A4A5"
+                      size={13}
+                    />
+                  )}
+                </Text>
+              ) : (
+                ""
+              )}
               <Text className=" text-sm text-gray-600 " numberOfLines={1}>
                 {item.message}
               </Text>

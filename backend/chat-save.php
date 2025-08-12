@@ -7,6 +7,7 @@ $requestMsgObject = json_decode($requestJSON);
 $msg = $requestMsgObject->msg;
 $from_user_id = $requestMsgObject->from_user_id;
 $to_user_id = $requestMsgObject->to_user_id;
+date_default_timezone_set('Asia/Colombo');
 $datetime = date("Y-m-d H:i:s");
 $status = 3;
 

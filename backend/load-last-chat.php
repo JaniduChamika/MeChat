@@ -18,7 +18,8 @@ for ($x = 0; $x < $table->num_rows; $x++) {
       $phpArrayItemObject->image = $user["profile_url"];
       $phpArrayItemObject->name = $user["name"];
       $phpArrayItemObject->id = $user["id"];
-      $phpArrayItemObject->online = false; // Default to false, can be updated later
+      $phpArrayItemObject->online = false;
+      $phpArrayItemObject->lastsender = "me";
       $table2 = DB::search("SELECT * FROM `chat` 
       INNER JOIN `status` ON `chat`.`status_id`=`status`.`id`
        WHERE `user_from`='" . $userPhpObject->id . "' AND `user_to`='" . $user["id"] . "' 
@@ -26,9 +27,10 @@ for ($x = 0; $x < $table->num_rows; $x++) {
     `user_from`='" . $user["id"] . "' AND `user_to`='" . $userPhpObject->id . "' 
     ORDER BY `date_time` DESC");
       if ($table2->num_rows == 0) {
-            $phpArrayItemObject->message = $userPhpObject->name;
+            $phpArrayItemObject->message = "Waiting for accept";
             $phpArrayItemObject->time = "";
             $phpArrayItemObject->count = "0";
+            $phpArrayItemObject->lastsender = "friend";
       } else {
             //unseen chat count
             $unseenChatCount = 0;
@@ -36,6 +38,7 @@ for ($x = 0; $x < $table->num_rows; $x++) {
             $lastChatRow = $table2->fetch_assoc();
             if ($lastChatRow["status_id"] != 1 && $lastChatRow["user_from"] == $user["id"]) {
                   $unseenChatCount++;
+                  $phpArrayItemObject->lastsender = "friend";
             }
             $phpArrayItemObject->status = $lastChatRow["name"];
             $phpArrayItemObject->message = $lastChatRow["message"];
