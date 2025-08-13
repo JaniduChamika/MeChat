@@ -42,6 +42,8 @@ for ($x = 0; $x < $table->num_rows; $x++) {
             $lastChatRow = $table2->fetch_assoc();
             if ($lastChatRow["status_id"] != 1 && $lastChatRow["user_from"] == $user["id"]) {
                   $unseenChatCount++;
+            }
+            if ($lastChatRow["user_from"] == $user["id"]) {
                   $phpArrayItemObject->lastsender = "friend";
             }
             $phpArrayItemObject->status = $lastChatRow["name"];
