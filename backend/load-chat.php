@@ -9,12 +9,12 @@ $query = "SELECT `chat`.`id`, `chat`.`message`,`chat`.`date_time`,`chat`.`user_t
 INNER JOIN `type` ON `chat`.`type_id`=`type`.`id` 
 INNER JOIN `status` ON `chat`.`status_id`=`status`.`id`
 WHERE (`user_from` = '" . $user . "' AND `user_to` = '" . $friend . "') 
-OR (`user_from` = '" . $friend . "' AND `user_to` = '" . $user . "') ORDER BY `date_time` ASC";
+OR (`user_from` = '" . $friend . "' AND `user_to` = '" . $user . "') ORDER BY `date_time` DESC";
 
 $table = DB::search($query);
 $chatArray = array();
 
-
+$lastTime="";
 for ($i = 0; $i < $table->num_rows; $i++) {
       $row = $table->fetch_assoc();
       DB::iudParam("UPDATE `chat` SET `status_id` = '1' WHERE chat.`id` = ? AND `user_from` = ?", [$row["id"], $friend]);

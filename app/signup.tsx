@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 export default function SignUpScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -141,7 +142,10 @@ export default function SignUpScreen() {
               </View>
               {/* Camera Icon */}
               <View className="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-full border-2 border-gray-200 items-center justify-center">
-                <Text className="text-gray-600 text-xs">📷</Text>
+                <Text className="text-gray-600 text-xs">
+                  {" "}
+                  <MaterialIcons name="cloud-upload" color="#000" size={24} />
+                </Text>
               </View>
             </TouchableOpacity>
           </View>

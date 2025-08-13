@@ -114,7 +114,7 @@ export default function HomeScreen() {
         var response = request.responseText;
         var responseJSONText = JSON.parse(response);
         setchatLast(responseJSONText);
-        // console.log("chat load: " + response);
+        console.log("chat load: " + response);
       }
     };
     request.open(
@@ -166,7 +166,7 @@ export default function HomeScreen() {
             <View className="flex-row items-center">
               {item.lastsender === "me" ? (
                 <Text className="text-xs text-gray-400 mr-2">
-                  {item.status === "seen" ? (
+                  {item.status === "seen"  ? (
                     <Ionicons name="checkmark-done" color="#0189D3" size={13} />
                   ) : item.status === "delivered" ? (
                     <Ionicons name="checkmark-done" color="#A4A4A5" size={13} />

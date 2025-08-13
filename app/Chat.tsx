@@ -1,22 +1,26 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useGlobalSearchParams } from "expo-router";
 
+import * as DocumentPicker from "expo-document-picker";
 import React, { useEffect, useState } from "react";
 import {
+  Dimensions,
   FlatList,
   Image,
   Keyboard,
   KeyboardAvoidingView,
+  Modal,
   Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Entypo from "react-native-vector-icons/Entypo";
 import Feather from "react-native-vector-icons/Feather";
 import Ionicons from "react-native-vector-icons/Ionicons";
-
 export default function ChatScreen() {
   const params = useGlobalSearchParams();
   const friendId = params.friendId;
@@ -28,8 +32,28 @@ export default function ChatScreen() {
   const [user, setUser] = useState(null);
   const [chatdata, setChatData] = useState([]);
   const [playingVoice, setPlayingVoice] = useState(null);
+  const [file, setFile] = useState(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   useEffect(() => {
     loaduser();
+
+    //remove keyboard gap when keyboard is hidden
+    const showSub = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardVisible(true)
+    );
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardVisible(false)
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
   }, []);
   useEffect(() => {
     loadChat();
@@ -97,18 +121,96 @@ export default function ChatScreen() {
     }
   }
 
-  
-  
+  // File type checker
+  const getFileType = (mimeType, name) => {
+    if (mimeType?.startsWith("image/")) return "image";
+    if (mimeType?.includes("pdf") || name?.endsWith(".pdf")) return "pdf";
+    return "document";
+  };
+
+  // File size formatter
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  // Pick document/file
+  const pickDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ["application/pdf", "image/*"],
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const file = result.assets[0];
+        const fileInfo = {
+          uri: file.uri,
+          name: file.name,
+          size: file.size,
+          type: file.mimeType,
+          fileType: getFileType(file.mimeType, file.name),
+        };
+        console.log("Selected file:", fileInfo);
+
+        setSelectedFile(fileInfo);
+        setShowPreviewModal(true);
+      }
+    } catch (error) {
+      console.error("Error picking document:", error);
+    }
+  };
+
+  const closePreviewModal = () => {
+    setShowPreviewModal(false);
+    setSelectedFile(null);
+    setIsUploading(false);
+  };
+
+  const sendAttachment = () => {
+    setIsUploading(true);
+    var requestMsgObject = {
+      from_user_id: user?.id,
+      to_user_id: friendId,
+      attach_type: selectedFile?.fileType,
+    };
+    var reqMsgJsonobject = JSON.stringify(requestMsgObject);
+    var formData = new FormData();
+    formData.append("reqMsgJsonobject", reqMsgJsonobject);
+    formData.append("attachment", selectedFile);
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+      if (request.readyState == 4 && request.status == 200) {
+        var response = request.responseText;
+        console.log(response);
+        if (response == "Success") {
+          loadChat();
+          closePreviewModal();
+          setIsUploading(false);
+        } else {
+          // console.log(response);
+        }
+      }
+    };
+    request.open(
+      "POST",
+      "http://10.0.2.2:8080/React-Native/MeChat/backend/attachment-save.php",
+      true
+    );
+
+    request.send(formData);
+  };
+
   const handleCallPress = () => {
     console.log("Call pressed");
   };
 
   const handleVideoPress = () => {
     console.log("Video call pressed");
-  };
-
-  const handleCameraPress = () => {
-    console.log("Camera pressed");
   };
 
   const handleMicPress = () => {
@@ -128,10 +230,16 @@ export default function ChatScreen() {
   }
 
   // Function to render different message types
-
+  let lastMsgTime = "";
+  let istimeVisible = true;
   const renderMessage = ({ item }) => {
     const isRight = item.side === "right";
-
+    if (lastMsgTime == item.time) {
+      istimeVisible = false;
+    } else {
+      istimeVisible = true;
+    }
+    lastMsgTime = item.time;
     return (
       <View
         key={item.id}
@@ -161,7 +269,7 @@ export default function ChatScreen() {
             </View>
           )}
 
-          {item.type === "img" && (
+          {item.type === "image" && (
             <View className="rounded-2xl overflow-hidden border-2 border-blue-100 ">
               <Image
                 source={{
@@ -206,42 +314,85 @@ export default function ChatScreen() {
           )}
 
           {/* Message time and status */}
-          <View
-            className={`flex-row items-center mt-1 ${isRight ? "justify-end" : "justify-start"}`}
-          >
-            <Text className="text-xs text-gray-400 mr-1">{item.time}</Text>
-            {isRight && (
-              <Text className="text-xs text-gray-400">
-                {item.status === "seen" ? (
-                  <Ionicons name="checkmark-done" color="#0189D3" size={16} />
-                ) : item.status === "delivered" ? (
-                  <Ionicons name="checkmark-done" color="#A4A4A5" size={16} />
-                ) : (
-                  <Ionicons name="checkmark-sharp" color="#A4A4A5" size={16} />
-                )}
-              </Text>
-            )}
-          </View>
+          {istimeVisible ? (
+            <View
+              className={`flex-row items-center mt-1 ${isRight ? "justify-end" : "justify-start"}`}
+            >
+              <Text className="text-xs text-gray-400 mr-1">{item.time}</Text>
+              {isRight && (
+                <Text className="text-xs text-gray-400">
+                  {item.status === "seen" ? (
+                    <Ionicons name="checkmark-done" color="#0189D3" size={16} />
+                  ) : item.status === "delivered" ? (
+                    <Ionicons name="checkmark-done" color="#A4A4A5" size={16} />
+                  ) : (
+                    <Ionicons
+                      name="checkmark-sharp"
+                      color="#A4A4A5"
+                      size={16}
+                    />
+                  )}
+                </Text>
+              )}
+            </View>
+          ) : (
+            ""
+          )}
         </View>
       </View>
     );
   };
 
-  //remove keyboard gap when keyboard is hidden
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
-  useEffect(() => {
-    const showSub = Keyboard.addListener("keyboardDidShow", () =>
-      setKeyboardVisible(true)
-    );
-    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
-      setKeyboardVisible(false)
-    );
+  const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, []);
+  // Render file preview based on type
+  const renderFilePreview = () => {
+    if (!selectedFile) return null;
+
+    switch (selectedFile.fileType) {
+      case "image":
+        return (
+          <View className="items-center">
+            <Image
+              source={{ uri: selectedFile.uri }}
+              style={{
+                width: screenWidth * 0.7,
+                height: screenHeight * 0.4,
+                borderRadius: 12,
+              }}
+              resizeMode="contain"
+            />
+          </View>
+        );
+
+      case "pdf":
+        return (
+          <View className="items-center bg-red-50 p-8 rounded-xl">
+            <Feather name="file" color="#000" size={24} />
+            <Text className="text-lg font-semibold text-gray-800 mt-4">
+              PDF Document
+            </Text>
+            <Text className="text-sm text-gray-600 text-center mt-2">
+              {selectedFile.name}
+            </Text>
+          </View>
+        );
+
+      default:
+        return (
+          <View className="items-center bg-blue-50 p-8 rounded-xl">
+            <Feather name="file" color="#000" size={24} />
+            <Text className="text-lg font-semibold text-gray-800 mt-4">
+              Document
+            </Text>
+            <Text className="text-sm text-gray-600 text-center mt-2">
+              {selectedFile.name}
+            </Text>
+          </View>
+        );
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
@@ -303,15 +454,15 @@ export default function ChatScreen() {
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingVertical: 16 }}
-          inverted={false} // Set to true if you want newest messages at bottom
+          inverted={true}
         />
 
         {/* Input Area */}
         <View className="flex-row items-center px-4 py-3 border-t border-gray-100">
-          <TouchableOpacity onPress={handleCameraPress} className="mr-3">
+          <TouchableOpacity onPress={pickDocument} className="mr-3">
             <Text className="text-blue-500 text-xl">
               {" "}
-              <Ionicons name="camera" color="#000" size={24} />
+              <Entypo name="attachment" color="#000" size={20} />
             </Text>
           </TouchableOpacity>
 
@@ -340,6 +491,74 @@ export default function ChatScreen() {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Preview Modal */}
+        <Modal
+          visible={showPreviewModal}
+          transparent={true}
+          animationType="slide"
+        >
+          <View className="flex-1 bg-black/90">
+            {/* Header */}
+            <View className="flex-row  p-6 pt-12 items-center justify-between">
+              <Text className="text-white font-semibold text-lg">Preview</Text>
+
+              <View className="w-10" />
+              <TouchableOpacity
+                onPress={closePreviewModal}
+                className="w-10 h-10 bg-white/20 rounded-full items-center justify-center"
+              >
+                <Ionicons name="close" color="#fff" size={24} />
+              </TouchableOpacity>
+            </View>
+
+            {/* File Preview */}
+            <ScrollView
+              className="flex-1 px-6"
+              contentContainerStyle={{
+                justifyContent: "center",
+                minHeight: "70%",
+              }}
+            >
+              {renderFilePreview()}
+
+              {/* File Info */}
+              {selectedFile && (
+                <View className="bg-white/10 rounded-xl p-4 mt-6">
+                  <Text className="text-white font-semibold text-base mb-2">
+                    {selectedFile.name}
+                  </Text>
+                  <View className="flex-row justify-between">
+                    <Text className="text-white/70 text-sm">
+                      Size: {formatFileSize(selectedFile.size)}
+                    </Text>
+                    <Text className="text-white/70 text-sm capitalize">
+                      Type: {selectedFile.fileType}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </ScrollView>
+
+            {/* Bottom Actions */}
+            <View className="p-6 pb-8">
+              <View className="flex-row space-x-4 justify-end">
+                <TouchableOpacity
+                  onPress={sendAttachment}
+                  disabled={isUploading}
+                  className={` py-3 px-4 rounded-xl items-center flex-row justify-right ${
+                    isUploading ? "bg-blue-400" : "bg-blue-500"
+                  }`}
+                >
+                  <Text className="text-white font-semibold mr-2">
+                    {isUploading ? "Sending..." : "Send"}
+                  </Text>
+                  <Ionicons name="send-sharp" color="#fff" size={20} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
