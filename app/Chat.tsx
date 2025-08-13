@@ -52,7 +52,7 @@ export default function ChatScreen() {
         var response = request.responseText;
         var responseJSONText = JSON.parse(response);
         setChatData(responseJSONText);
-        console.log(response);
+        // console.log(response);
       }
     };
     request.open(
@@ -98,10 +98,7 @@ export default function ChatScreen() {
   }
 
   
-  const handleSettingsPress = () => {
-    console.log("Settings pressed");
-  };
-
+  
   const handleCallPress = () => {
     console.log("Call pressed");
   };
