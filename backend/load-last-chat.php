@@ -1,14 +1,18 @@
 <?php
 require "connection.php";
 
-$userJsonText = $_POST["userJsonText"];
-// $userPhpObject =new stdClass();
-$userPhpObject = json_decode($userJsonText);
+
+
+$requestJSON = $_POST['reqMsgJsonobject'];
+$requestMsgObject = json_decode($requestJSON);
+
+$userPhpObject = $requestMsgObject->userJsonObject;
+$searchText = $requestMsgObject->search_text;
 
 
 $table = DB::search("SELECT `user`.`id`,`user`.`name`,`user`.`profile_url` FROM `friends`
 INNER JOIN `user` ON `friends`.`freind_id`=`user`.`id` 
-WHERE `user_id` = '" . $userPhpObject->id . "'");
+WHERE `user_id` = '" . $userPhpObject->id . "' AND (`user`.`name` LIKE '%$searchText%' OR user.email LIKE '%$searchText%')");
 
 $phpResponseArray = array();
 for ($x = 0; $x < $table->num_rows; $x++) {
@@ -22,9 +26,9 @@ for ($x = 0; $x < $table->num_rows; $x++) {
       $phpArrayItemObject->lastsender = "me";
       $table2 = DB::search("SELECT * FROM `chat` 
       INNER JOIN `status` ON `chat`.`status_id`=`status`.`id`
-       WHERE `user_from`='" . $userPhpObject->id . "' AND `user_to`='" . $user["id"] . "' 
+      WHERE (`user_from`='" . $userPhpObject->id . "' AND `user_to`='" . $user["id"] . "' )
     OR 
-    `user_from`='" . $user["id"] . "' AND `user_to`='" . $userPhpObject->id . "' 
+    (`user_from`='" . $user["id"] . "' AND `user_to`='" . $userPhpObject->id . "' ) 
     ORDER BY `date_time` DESC");
       if ($table2->num_rows == 0) {
             $phpArrayItemObject->message = "Waiting for accept";

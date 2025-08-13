@@ -1,96 +1,107 @@
-import * as React from "react";
+import React, { useState, useCallback } from "react";
 import {
   Animated,
-  StatusBar,
   StyleSheet,
   TouchableOpacity,
   View,
+  Text
 } from "react-native";
-import { SceneMap, TabView } from "react-native-tab-view";
+import { TabView } from "react-native-tab-view";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Friend from "./Friend";
 import Home from "./Home";
 import Profile from "./Profile";
-const ChatRoute = () => <Home />;
-const FriendRoute = () => <Friend />;
-const SettingRoute = () => <Profile />;
-export default class TabViewExample extends React.Component {
-  state = {
-    index: 0,
-    routes: [
-      { key: "chat", title: "Chat", icon: "chatbubbles" },
-      { key: "friend", title: "Friend", icon: "people" },
-      { key: "setting", title: "Setting", icon: "settings" },
-    ],
-  };
 
-  _handleIndexChange = (index) => this.setState({ index });
+const TabViewExample = () => {
+  const [index, setIndex] = useState(0);
+  const [refreshKeys, setRefreshKeys] = useState({
+    chat: 0,
+    friend: 0,
+    setting: 0
+  });
 
-  _renderTabBar = (props) => {
-    const inputRange = props.navigationState.routes.map((x, i) => i);
-    const [chatColor, setChatColor] = React.useState("#0af");
-    const [friendColor, setFriendColor] = React.useState("#000");
-    const [settingColor, setSettingColor] = React.useState("#000");
+  const routes = [
+    { key: "chat", title: "Chat", icon: "chatbubbles" },
+    { key: "friend", title: "Friend", icon: "people" },
+    { key: "setting", title: "Setting", icon: "settings" },
+  ];
+
+  const handleIndexChange = useCallback((newIndex) => {
+    const currentRoute = routes[newIndex];
+    
+    // Update index and refresh the selected tab
+    setIndex(newIndex);
+    setRefreshKeys(prev => ({
+      ...prev,
+      [currentRoute.key]: prev[currentRoute.key] + 1
+    }));
+  }, [routes]);
+
+  const renderScene = useCallback(({ route }) => {
+    // Only render the active scene to improve performance
+    if (routes[index].key !== route.key) {
+      return <View />;
+    }
+
+    switch (route.key) {
+      case 'chat':
+        return <Home key={refreshKeys.chat} />;
+      case 'friend':
+        return <Friend key={refreshKeys.friend} />;
+      case 'setting':
+        return <Profile key={refreshKeys.setting} />;
+      default:
+        return <View />;
+    }
+  }, [index, refreshKeys, routes]);
+
+  const renderTabBar = useCallback((props) => {
     return (
       <View style={styles.tabBar} className="bg-gray-50">
-        {props.navigationState.routes.map((route, i) => {
-          const opacity = props.position.interpolate({
-            inputRange,
-            outputRange: inputRange.map((inputIndex) =>
-              inputIndex === i ? 1 : 0.5
-            ),
-          });
-
+        {routes.map((route, i) => {
+          const isActive = index === i;
+          
           return (
             <TouchableOpacity
               style={styles.tabItem}
-              onPress={() => {
-                this.setState({ index: i });
-
-                setChatColor(route.key === "chat" ? "#0af" : "#000");
-                setFriendColor(route.key === "friend" ? "#0af" : "#000");
-                setSettingColor(route.key === "setting" ? "#0af" : "#000");
-              }}
+              onPress={() => handleIndexChange(i)}
               key={route.key}
+              activeOpacity={0.7}
             >
               <Ionicons
                 name={route.icon}
-                color={
-                  route.key === "chat"
-                    ? chatColor
-                    : route.key === "friend"
-                      ? friendColor
-                      : settingColor
-                }
+                color={isActive ? "#0af" : "#666"}
                 size={24}
               />
-              <Animated.Text style={{ opacity }}>{route.title}</Animated.Text>
+              <Text 
+                style={{
+                  color: isActive ? "#0af" : "#666",
+                  fontSize: 12,
+                  marginTop: 4,
+                  fontWeight: isActive ? '600' : '400'
+                }}
+              >
+                {route.title}
+              </Text>
             </TouchableOpacity>
           );
         })}
       </View>
     );
-  };
+  }, [index, routes, handleIndexChange]);
 
-  _renderScene = SceneMap({
-    chat: ChatRoute,
-    friend: FriendRoute,
-    setting: SettingRoute,
-  });
-
-  render() {
-    return (
-      <TabView
-        navigationState={this.state}
-        renderScene={this._renderScene}
-        renderTabBar={this._renderTabBar}
-        onIndexChange={this._handleIndexChange}
-        tabBarPosition="bottom"
-        swipeEnabled={false}
-      />
-    );
-  }
-}
+  return (
+    <TabView
+      navigationState={{ index, routes }}
+      renderScene={renderScene}
+      renderTabBar={renderTabBar}
+      onIndexChange={handleIndexChange}
+      tabBarPosition="bottom"
+      swipeEnabled={false}
+      lazy={true} // Enable lazy loading for better performance
+    />
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -100,11 +111,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingTop: 20,
     marginBottom: 20,
+    backgroundColor: '#f9fafb'
   },
   tabItem: {
     flex: 1,
     alignItems: "center",
     padding: 16,
-    paddingTop: 1,
+    paddingTop: 8,
   },
 });
+
+export default TabViewExample;

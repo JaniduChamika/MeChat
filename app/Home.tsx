@@ -99,15 +99,22 @@ export default function HomeScreen() {
 
   async function loadChatLast() {
     const userJsonText = await AsyncStorage.getItem("user");
+    const userObject = JSON.parse(userJsonText);
+    var requestMsgObject = {
+      userJsonObject: userObject,
+      search_text: searchText,
+    };
+    var reqMsgJsonobject = JSON.stringify(requestMsgObject);
+    // console.log(reqMsgJsonobject);
     var formData = new FormData();
-    formData.append("userJsonText", userJsonText);
+    formData.append("reqMsgJsonobject", reqMsgJsonobject);
     var request = new XMLHttpRequest();
     request.onreadystatechange = await function () {
       if (request.readyState == 4 && request.status == 200) {
         var response = request.responseText;
         var responseJSONText = JSON.parse(response);
         setchatLast(responseJSONText);
-        console.log(response);
+        // console.log("chat load: " + response);
       }
     };
     request.open(
@@ -118,15 +125,7 @@ export default function HomeScreen() {
     request.send(formData);
   }
 
-  const handleSearch = (text) => {
-    console.log("Search pressed: " + text);
-  };
-
-  const handleChatPress = (chat) => {
-    console.log("Chat pressed:", chat.name);
-    router.push({ pathname: "/Chat", params: { id: chat.id.toString() } });
-  };
-
+ 
   const renderChat = ({ item }) => (
     <TouchableOpacity
       onPress={() =>
@@ -228,7 +227,6 @@ export default function HomeScreen() {
               value={searchText}
               onChangeText={(text) => {
                 setSearchText(text);
-                handleSearch(text);
               }}
               className="flex-1 text-base"
               placeholderTextColor="#9CA3AF"

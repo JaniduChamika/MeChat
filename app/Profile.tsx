@@ -1,13 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import {
-  Image,
-  
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 
@@ -34,14 +28,19 @@ export default function ProfileScreen() {
           <Image
             className="w-24 h-24 rounded-full"
             source={{
-              uri: "http://10.0.2.2:8080/React-Native/MeChat/backend/"+user?.profile_url,
+              uri:
+                "http://10.0.2.2:8080/React-Native/MeChat/backend/" +
+                user?.profile_url,
             }}
           />
         </View>
         <Text className="text-center text-lg font-semibold mb-6">
           {user?.name}
         </Text>
-        <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-200">
+        <TouchableOpacity
+          className="flex-row items-center p-4 border-b border-gray-200"
+          onPress={() => router.push("/Account")}
+        >
           <Text className="flex-1 text-gray-600">Account Details</Text>
           <Text className="text-gray-400">
             <MaterialIcons name="arrow-forward-ios" color="#c4c4c4" size={20} />

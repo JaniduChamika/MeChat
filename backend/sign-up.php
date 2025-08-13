@@ -26,11 +26,14 @@ if (empty($email)) {
 } else if (!$profile_pic || $profile_pic['error'] === UPLOAD_ERR_NO_FILE) {
       $msg = "Profile picture is required.";
 } else {
+      $text = str_replace(' ', '_', $username);
+      $pic_extend = strtolower($text);
+      $picname = $userid . "_" . $pic_extend;
       $profile_pic_location = $_FILES["profile_pic"]["tmp_name"];
       DB::iud("INSERT INTO `user` (`id`,`email`, `name`, `password`, `country_id`, `profile_url`) 
-      VALUES ('$userid', '$email', '$username', '$password', '$country', 'uploads/$userid.jpg')");
+      VALUES ('$userid', '$email', '$username', '$password', '$country', 'uploads/$picname.jpg')");
 
-      move_uploaded_file($profile_pic_location, "uploads/" . $userid . ".jpg");
+      move_uploaded_file($profile_pic_location, "uploads/" . $picname . ".jpg");
       $msg = "User registered successfully.";
 }
 

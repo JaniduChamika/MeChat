@@ -32,6 +32,7 @@ export default function FriendsScreen() {
     loaduser();
   }, []);
   useEffect(() => {
+    if(!user) return;
     loadFriends();
     loadFriendsRequests();
   }, [user, searchText]);
@@ -40,19 +41,24 @@ export default function FriendsScreen() {
     const userJsonText = await AsyncStorage.getItem("user");
     const userObject = JSON.parse(userJsonText);
     setUser(userObject);
-    // console.log(userObject.name);
+    // console.log("User load: "+userObject.name);
   }
 
   function loadFriends() {
+    var requestMsgObject = {
+      user_id: user?.id,
+      search_text: searchText,
+    };
+    var reqMsgJsonobject = JSON.stringify(requestMsgObject);
     var formData = new FormData();
-    formData.append("user_id", user?.id);
+    formData.append("reqMsgJsonobject", reqMsgJsonobject);
     var request = new XMLHttpRequest();
     request.onreadystatechange = function () {
       if (request.readyState == 4 && request.status == 200) {
         var response = request.responseText;
         var responseJSONText = JSON.parse(response);
         setFriends(responseJSONText);
-        console.log(response);
+        // console.log("Friend load: " + response);
       }
     };
     request.open(
@@ -106,7 +112,7 @@ export default function FriendsScreen() {
         var response = request.responseText;
         var responseJSONText = JSON.parse(response);
         setFriendRequests(responseJSONText);
-        // console.log(response);
+        // console.log("Friend Req load: " + response);
       }
     };
     request.open(
@@ -147,9 +153,7 @@ export default function FriendsScreen() {
     request.send(formData);
   }
 
-  const handleSearch = (text) => {
-    loadFriends();
-  };
+ 
   const renderItem = ({ item }) => (
     <View className="flex-row items-center justify-between p-4 border-b border-gray-100">
       <View className="flex-row items-center">
@@ -224,7 +228,6 @@ export default function FriendsScreen() {
               value={searchText}
               onChangeText={(text) => {
                 setSearchText(text);
-                handleSearch(text);
               }}
               className="flex-1 text-base"
               placeholderTextColor="#9CA3AF"
