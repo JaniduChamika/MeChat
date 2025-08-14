@@ -50,7 +50,7 @@ A modern, feature-rich React Native chat application that brings people together
 
 | Home | Chat | Frinde Req | Add Friend 
 |-----------------|-----------------------|-----------------------|-----------------------|
-| ![Home](resource/Screenshots/dashboard-admin.png) | ![Chat](resource/Screenshots/dahboard-receptionist.png) | ![Frinde Req](resource/Screenshots/dashboard-admin.png) |  ![Add Friend ](resource/Screenshots/dashboard-admin.png) | 
+| ![Home](resource/screenshot/home.png) | ![Chat](resource/screenshot/chat.png) | ![Frinde Req](resource/screenshot/friend_req.png) |  ![Add Friend ](resource/screenshot/add-friend.png) | 
 
 ## 🛠️ Tech Stack
 
