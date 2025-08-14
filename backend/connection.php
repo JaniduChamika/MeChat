@@ -6,7 +6,7 @@ class DB
       public static function connect()
       {
             if (!isset($dbms)) {
-                  DB::$dbms = new mysqli("localhost", "root", "@JaniduChamika2001", "mechat", "3306");
+                  DB::$dbms = new mysqli("localhost", "root", "#######", "mechat", "3306");
             }
       }
       public static function iud($q)
