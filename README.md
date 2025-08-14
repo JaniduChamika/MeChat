@@ -48,15 +48,9 @@ A modern, feature-rich React Native chat application that brings people together
 
 *Coming soon - Screenshots will showcase the beautiful interface of MeChat*
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Login Screen  │    │  Chat Interface │    │ Profile Screen  │
-│                 │    │                 │    │                 │
-│  [Login Form]   │    │  [Messages]     │    │  [User Info]    │
-│  [Sign Up]      │    │  [Input Field]  │    │  [Settings]     │
-│                 │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
+| Home | Chat | Frinde Req | Add Friend 
+|-----------------|-----------------------|-----------------------|-----------------------|
+| ![Home](resource/Screenshots/dashboard-admin.png) | ![Chat](resource/Screenshots/dahboard-receptionist.png) | ![Frinde Req](resource/Screenshots/dashboard-admin.png) |  ![Add Friend ](resource/Screenshots/dashboard-admin.png) | 
 
 ## 🛠️ Tech Stack
 
