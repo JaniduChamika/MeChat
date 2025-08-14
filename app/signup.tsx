@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import {
   Alert,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -28,8 +29,21 @@ export default function SignUpScreen() {
     require("../assets/images/profile-default.png")
   );
   const [isSignUp, setIsSignUp] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   useEffect(() => {
     loadCountry();
+    //remove keyboard gap when keyboard is hidden
+    const showSub = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardVisible(true)
+    );
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardVisible(false)
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
   }, []);
   function loadCountry() {
     var request = new XMLHttpRequest();
@@ -68,7 +82,9 @@ export default function SignUpScreen() {
     request.onreadystatechange = function () {
       if (request.readyState == 4 && request.status == 200) {
         var response = request.responseText;
+
         if (response == "User registered successfully.") {
+          setIsSignUp(false);
           router.push("/signin");
         } else {
           console.log(response);
@@ -120,7 +136,13 @@ export default function SignUpScreen() {
     <SafeAreaView className="flex-1 bg-gray-100">
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"} // moves view up
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : keyboardVisible
+              ? "height"
+              : undefined
+        } // moves view up
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0} // adjust for headers
       >
         {/* Content */}
@@ -142,10 +164,7 @@ export default function SignUpScreen() {
               </View>
               {/* Camera Icon */}
               <View className="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-full border-2 border-gray-200 items-center justify-center">
-                <Text className="text-gray-600 text-xs">
-                  {" "}
-                  <MaterialIcons name="cloud-upload" color="#000" size={24} />
-                </Text>
+                <MaterialIcons name="cloud-upload" color="#000" size={16} />
               </View>
             </TouchableOpacity>
           </View>
@@ -222,7 +241,7 @@ export default function SignUpScreen() {
             disabled={isSignUp}
           >
             <Text className="text-white text-base font-semibold text-center">
-              Sign Up
+            {isSignUp?"Wait...":"Sign Up"}  
             </Text>
           </TouchableOpacity>
 
