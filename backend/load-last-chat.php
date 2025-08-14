@@ -47,7 +47,22 @@ for ($x = 0; $x < $table->num_rows; $x++) {
                   $phpArrayItemObject->lastsender = "friend";
             }
             $phpArrayItemObject->status = $lastChatRow["name"];
-            $phpArrayItemObject->message = $lastChatRow["message"];
+            switch ($lastChatRow["type_id"]) {
+                  case 1:
+                        $phpArrayItemObject->message = $lastChatRow["message"];
+                        break;
+                  case 2:
+                        $phpArrayItemObject->message = "Image";
+                        break;
+                  case 3:
+                        $phpArrayItemObject->message = "Attachment";
+                        break;
+                  default:
+                        $phpArrayItemObject->message = $lastChatRow["message"];
+                        break;
+            }
+
+
 
             $phpDateTimeObj = strtotime($lastChatRow["date_time"]);
             $timeStr = date("h i a", $phpDateTimeObj);

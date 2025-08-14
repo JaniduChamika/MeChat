@@ -1,0 +1,52 @@
+info Fetching system and libraries information...
+System:
+  OS: Windows 11 10.0.26100
+  CPU: (16) x64 Intel(R) Core(TM) i7-10870H CPU @ 2.20GHz
+  Memory: 14.16 GB / 31.79 GB
+Binaries:
+  Node:
+    version: 22.16.0
+    path: C:\nvm4w\nodejs\node.EXE
+  Yarn: Not Found
+  npm:
+    version: 10.9.2
+    path: C:\nvm4w\nodejs\npm.CMD
+  Watchman: Not Found
+SDKs:
+  Android SDK: Not Found
+  Windows SDK:
+    AllowDevelopmentWithoutDevLicense: Enabled
+    AllowAllTrustedApps: Enabled
+    Versions:
+      - 10.0.19041.0
+IDEs:
+  Android Studio: AI-243.26053.27.2432.13536105
+  Visual Studio:
+    - 17.14.36408.4 (Visual Studio Community 2022)
+Languages:
+  Java: 17.0.15
+  Ruby: Not Found
+npmPackages:
+  "@react-native-community/cli":
+    installed: 20.0.0
+    wanted: ^20.0.0
+  react:
+    installed: 19.0.0
+    wanted: 19.0.0
+  react-native:
+    installed: 0.79.5
+    wanted: 0.79.5
+  react-native-windows: Not Found
+npmGlobalPackages:
+  "*react-native*": Not Found
+Android:
+  hermesEnabled: Not found
+  newArchEnabled: Not found
+iOS:
+  hermesEnabled: Not found
+  newArchEnabled: Not found
+
+info React Native v0.81.0 is now available (your project is running on v0.79.5).
+info Changelog: https://github.com/facebook/react-native/releases/tag/v0.81.0
+info Diff: https://react-native-community.github.io/upgrade-helper/?from=0.79.5&to=0.81.0
+info For more info, check out "https://reactnative.dev/docs/upgrading?os=windows".

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -92,6 +93,22 @@ export default function HomeScreen() {
   const [searchText, setSearchText] = useState("");
   const [user, setUser] = useState();
   const [chatLast, setchatLast] = useState();
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    //remove keyboard gap when keyboard is hidden
+    const showSub = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardVisible(true)
+    );
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardVisible(false)
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   useEffect(() => {
     loadChatLast();
@@ -125,7 +142,6 @@ export default function HomeScreen() {
     request.send(formData);
   }
 
- 
   const renderChat = ({ item }) => (
     <TouchableOpacity
       onPress={() =>
@@ -166,7 +182,7 @@ export default function HomeScreen() {
             <View className="flex-row items-center">
               {item.lastsender === "me" ? (
                 <Text className="text-xs text-gray-400 mr-2">
-                  {item.status === "seen"  ? (
+                  {item.status === "seen" ? (
                     <Ionicons name="checkmark-done" color="#0189D3" size={13} />
                   ) : item.status === "delivered" ? (
                     <Ionicons name="checkmark-done" color="#A4A4A5" size={13} />
@@ -210,7 +226,13 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : keyboardVisible
+              ? "height"
+              : undefined
+        }
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
         {/* Header */}
